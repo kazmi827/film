@@ -1,0 +1,40 @@
+# Rozana: naye movies sync + content + 300 pages drip publish
+# GitHub repo -> Settings -> Secrets and variables -> Actions mein yeh secrets daalo:
+# NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, TMDB_TOKEN, DEEPSEEK_API_KEY, OMDB_API_KEY (optional)
+name: daily-sync
+
+on:
+  schedule:
+    - cron: '17 21 * * *'   # 02:17 PKT
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Sirf is saal aur agle saal ki nayi releases (purana catalog ek dafa local se bhara gaya)
+      - run: npm run sync:discover -- --target=200 --from-year=2026
+      # 7 din purani movies dobara sync hoti hain (OTT availability weekly refresh)
+      - run: npm run sync:movies
+      - run: npm run series:discover -- --target=600
+      - run: npm run series:sync
+      - run: npm run sync:people
+      - name: IMDb ratings (optional)
+        if: env.OMDB_API_KEY != ''
+        run: npm run sync:ratings -- --limit=900
+      - run: npm run content:generate -- --limit=400
+      - run: npm run publish:check -- --limit=300 --series-limit=100
+
