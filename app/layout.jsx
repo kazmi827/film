@@ -17,8 +17,8 @@ export const metadata = {
   twitter: { card: 'summary_large_image', images: [DEFAULT_OG] },
   robots: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
   formatDetection: { telephone: false },
-  // Search Console: Vercel env mein GOOGLE_SITE_VERIFICATION daalo (HTML tag ka content value)
-  ...(process.env.GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } } : {}),
+  // Google Search Console verification
+  verification: { google: 'LLeQZM9jVZs88AU4OfK3XnJYzc-8fCx8LD0Ug8ZgdhM' },
 };
 
 export const viewport = { themeColor: '#0f0f12', width: 'device-width', initialScale: 1 };
